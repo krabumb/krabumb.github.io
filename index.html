@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHAD COUNTDOWN — DEMENAGEMENT</title>
+  <style>
+    :root{
+      --neon:#00ff88;
+      --bg1:#000000;
+      --bg2:#0a0a0a;
+      --accent:#ff0044;
+      --text:#e6ffe6;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: radial-gradient(1200px 800px at 50% 50%, var(--bg2), var(--bg1) 70%);
+      color: var(--text);
+      font-family: 'Impact', 'Orbitron', 'Bebas Neue', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Animated grid background */
+    .grid {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(transparent 24px, rgba(0,255,136,0.08) 25px) 0 0/100% 25px,
+        linear-gradient(90deg, transparent 24px, rgba(0,255,136,0.08) 25px) 0 0/25px 100%;
+      filter: drop-shadow(0 0 6px rgba(0,255,136,0.25));
+      animation: gridMove 12s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes gridMove {
+      from { transform: translateY(0); }
+      to { transform: translateY(25px); }
+    }
+
+    /* Glow ring */
+    .halo {
+      position:absolute; inset: -20% -10% -10% -10%;
+      background: radial-gradient(circle at center, rgba(0,255,136,0.08), rgba(0,0,0,0) 55%);
+      filter: blur(20px);
+      animation: haloPulse 3s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes haloPulse {
+      0%,100%{opacity:0.6}
+      50%{opacity:1}
+    }
+
+    .container{
+      position: relative;
+      z-index: 2; /* above canvas */
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      gap: 16px;
+    }
+
+    .title{
+      font-size: clamp(2.2rem, 4vw + 1rem, 6rem);
+      letter-spacing: 6px;
+      margin: 0;
+      text-shadow:
+        0 0 20px var(--neon),
+        0 0 60px var(--neon);
+      filter: saturate(1.2);
+      position: relative;
+      display:inline-block;
+    }
+
+    /* Subtle glitch effect */
+    .title::after, .title::before{
+      content: attr(data-text);
+      position:absolute; left:0; top:0; width:100%;
+      clip-path: inset(0 0 0 0);
+      opacity:0.75;
+      mix-blend-mode: screen;
+      pointer-events:none;
+    }
+    .title::before{ color:#00ffaa; transform: translate(1px,0); animation: glitch1 2.5s infinite; }
+    .title::after{ color:#ff0044; transform: translate(-1px,0); animation: glitch2 3s infinite; }
+    @keyframes glitch1 { 0%{clip-path: inset(0 0 85% 0)} 10%{clip-path: inset(0 0 20% 0)} 20%{clip-path: inset(0 0 60% 0)} 30%{clip-path: inset(0 0 5% 0)} 40%{clip-path: inset(0 0 40% 0)} 100%{clip-path: inset(0 0 85% 0)} }
+    @keyframes glitch2 { 0%{clip-path: inset(90% 0 0 0)} 10%{clip-path: inset(70% 0 0 0)} 20%{clip-path: inset(30% 0 0 0)} 30%{clip-path: inset(10% 0 0 0)} 40%{clip-path: inset(50% 0 0 0)} 100%{clip-path: inset(90% 0 0 0)} }
+
+    .countdown{
+      display:flex; gap:min(3vw,28px);
+      align-items:flex-end; justify-content:center;
+      margin-block: clamp(8px, 2vh, 20px);
+      filter: drop-shadow(0 0 20px rgba(0,255,136,0.55));
+      flex-wrap: nowrap; /* keep units on one line so SECONDES doesn't wrap off-screen */
+    }
+    .unit{
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding: clamp(8px, 1.5vw, 14px) clamp(12px, 2.5vw, 20px);
+      border: 2px solid rgba(0,255,136,0.25);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(0,255,136,0.08), rgba(0,0,0,0.3));
+      min-width: clamp(90px, 18vw, 220px);
+      transition: transform 100ms ease;
+    }
+    .value{
+      font-size: clamp(2.5rem, 8vw, 9rem);
+      line-height: 0.9;
+      font-weight: 900;
+      text-shadow: 0 0 25px var(--neon), 0 0 70px var(--neon);
+    }
+    .label{
+      font-size: clamp(0.9rem, 1.5vw, 1.4rem);
+      letter-spacing: 3px;
+      opacity:0.85;
+      margin-top: 6px;
+    }
+
+    .controls{
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:center;
+      margin-top: 6px;
+    }
+    button, .file-label, input[type="range"]{
+      font-family: inherit;
+      border:1px solid rgba(0,255,136,0.35);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.35);
+      color: var(--text);
+      padding: 10px 14px;
+      cursor:pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms;
+      box-shadow: 0 0 12px rgba(0,255,136,0.15) inset, 0 0 12px rgba(0,255,136,0.15);
+    }
+    button:hover, .file-label:hover{
+      transform: translateY(-2px);
+      border-color: var(--neon);
+      box-shadow: 0 0 18px rgba(0,255,136,0.35), 0 0 18px rgba(0,255,136,0.35) inset;
+    }
+    .file-input{ display:none; }
+    .file-label{ display:inline-flex; align-items:center; gap:8px; }
+
+    .footer{
+      bottom:10px; width:100%; text-align:center;
+      font-size: 0.95rem; opacity:0.8; letter-spacing: 1.5px;
+      z-index: 3; /* ensure footer stays on top */
+    }
+
+    /* Visualizer */
+    canvas#viz {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 28vh; width: 100%;
+      opacity: 0.45;
+      filter: drop-shadow(0 0 14px rgba(0,255,136,0.4));
+      pointer-events: none;
+      z-index: 0; /* push canvas behind content */
+    }
+
+    /* Shake on bass */
+    .shake {
+      animation: shake 250ms cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+      40%, 60% { transform: translate3d(3px, 0, 0); }
+    }
+
+    /* Progress ring around title that fills as days pass (optional aesthetic) */
+    .ring {
+      position:absolute; width:min(80vmin, 720px); aspect-ratio:1 / 1;
+      border-radius:50%;
+      box-shadow: 0 0 80px rgba(0,255,136,0.2);
+      pointer-events:none;
+    }
+    .ring::before {
+      content:"";
+      position:absolute; inset: -10px;
+      border-radius:50%;
+      background:
+        conic-gradient(from 0turn, var(--neon) var(--progress, 0%), rgba(0,255,136,0.08) 0%);
+      -webkit-mask:
+        radial-gradient(circle at center, transparent 64%, black 66%);
+      mask:
+        radial-gradient(circle at center, transparent 64%, black 66%);
+      filter: blur(1.5px) saturate(1.6);
+      transition: --progress 1s ease;
+    }
+
+    .hint {
+      font-size: 0.85rem; opacity: 0.7; margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="halo"></div>
+  <div class="grid"></div>
+
+  <div class="container" id="container">
+    <div class="ring" id="ring"></div>
+    <h1 class="title" id="title" data-text="CHAD COUNTDOWN">CHAD COUNTDOWN</h1>
+
+    <div class="countdown" id="countdown">
+      <div class="unit"><div id="days" class="value">--</div><div class="label">JOURS</div></div>
+      <div class="unit"><div id="hours" class="value">--</div><div class="label">HEURES</div></div>
+      <div class="unit"><div id="minutes" class="value">--</div><div class="label">MINUTES</div></div>
+      <div class="unit"><div id="seconds" class="value">--</div><div class="label">SECONDES</div></div>
+    </div>
+
+    <div class="controls">
+      <button id="fsBtn">Plein écran</button>
+      <label><input id="volume" type="range" min="0" max="1" step="0.01" value="0.65"></label>
+    </div>
+    
+    <div class="footer">🏠 Objectif : 1er novembre 2025 — 09:00 (heure de Paris). Tiens bon, Krabumb. 💪</div>
+  </div>
+
+  <canvas id="viz"></canvas>
+
+  <!-- Hidden audio element (user-supplied file) -->
+  <audio id="audio" preload="auto" src="mousik.mp3" loop autoplay></audio>
+
+<script>
+  // === Countdown to local Paris time: 1 Nov 2025, 00:00 (CET = UTC+1) ===
+  // We pin the absolute instant to "2025-11-01T00:00:00+01:00" to avoid DST ambiguity.
+  const target = new Date("2025-11-01T09:00:00+01:00").getTime();
+
+  const el = {
+    days: document.getElementById('days'),
+    hours: document.getElementById('hours'),
+    minutes: document.getElementById('minutes'),
+    seconds: document.getElementById('seconds'),
+    title: document.getElementById('title'),
+    ring: document.getElementById('ring'),
+    container: document.getElementById('container')
+  };
+
+  // Optional: progress ring from now to target across a fixed window (e.g., 30 days back)
+  const windowDays = 30; // customize if you want the arc to reflect last month sprint
+  const windowStart = target - windowDays*24*3600*1000;
+
+  function updateCountdown(){
+    const now = Date.now();
+    let dist = target - now;
+
+    if(dist <= 0){
+      document.body.classList.remove('shake');
+      document.body.innerHTML = `
+        <div class="halo"></div>
+        <div class="grid"></div>
+        <div class="container">
+          <h1 class="title" data-text="WELCOME HOME, CHAD">WELCOME HOME, CHAD</h1>
+          <p style="font-size:1.6rem;opacity:0.9">Ton royaume est prêt. Respire, pose tes cartons, et profite du silence. 🏡</p>
+        </div>`;
+      return;
+    }
+
+    const d = Math.floor(dist / (1000*60*60*24));
+    const h = Math.floor((dist % (1000*60*60*24)) / (1000*60*60));
+    const m = Math.floor((dist % (1000*60*60)) / (1000*60));
+    const s = Math.floor((dist % (1000*60)) / 1000);
+
+    el.days.textContent = d.toString().padStart(2,'0');
+    el.hours.textContent = h.toString().padStart(2,'0');
+    el.minutes.textContent = m.toString().padStart(2,'0');
+    el.seconds.textContent = s.toString().padStart(2,'0');
+
+    // Progress ring update
+    const progress = Math.max(0, Math.min(1, (now - windowStart) / (target - windowStart)));
+    el.ring.style.setProperty('--progress', (progress*100).toFixed(3) + '%');
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // === Fullscreen ===
+  document.getElementById('fsBtn').addEventListener('click', () => {
+    const elem = document.documentElement;
+    if (!document.fullscreenElement) {
+      elem.requestFullscreen?.() || elem.webkitRequestFullscreen?.();
+    } else {
+      document.exitFullscreen?.() || document.webkitExitFullscreen?.();
+    }
+  });
+
+  // === Audio / Visualizer ===
+  const audio = document.getElementById('audio');
+  const volume = document.getElementById('volume');
+  const viz = document.getElementById('viz');
+  const ctx = viz.getContext('2d');
+
+  let AC, source, analyser, data, rafId;
+  let bassEnergy = 0, lastShake = 0;
+
+  function resizeCanvas(){
+    viz.width = window.innerWidth;
+    viz.height = Math.floor(window.innerHeight * 0.28);
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  volume.addEventListener('input', () => {
+    audio.volume = parseFloat(volume.value);
+  });
+  audio.volume = parseFloat(volume.value);
+
+  async function enableAudio(){
+    if(!audio.src){
+      // If no file chosen, prompt the user
+      alert("Choisis un fichier audio (MP3/OGG) — idéalement une piste de DOOM que tu possèdes légalement 😉");
+      return;
+    }
+    // Autoplay policies require a user gesture
+    try{
+      // Create audio context once
+      if(!AC){
+        AC = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = AC.createAnalyser();
+        analyser.fftSize = 2048;
+        data = new Uint8Array(analyser.frequencyBinCount);
+      }
+      if(AC.state === 'suspended') await AC.resume();
+
+      // (Re)connect graph
+      if(source) source.disconnect();
+      source = AC.createMediaElementSource(audio);
+      source.connect(analyser);
+      analyser.connect(AC.destination);
+
+      await audio.play();
+
+      loopViz();
+    }catch(e){
+      console.error(e);
+      alert("Impossible de lancer l'audio. Essaie après avoir sélectionné un fichier et cliqué à nouveau.");
+    }
+  }
+
+  function pauseAudio(){
+    if(audio.paused) return;
+    audio.pause();
+    cancelAnimationFrame(rafId);
+  }
+
+  function loopViz(){
+    rafId = requestAnimationFrame(loopViz);
+    if(!analyser) return;
+
+    analyser.getByteFrequencyData(data);
+
+    // Draw bars
+    ctx.clearRect(0,0,viz.width,viz.height);
+    const n = 128;
+    const step = Math.floor(data.length / n);
+    const w = viz.width / n;
+    for(let i=0;i<n;i++){
+      const val = data[i*step] / 255;
+      const h = val * viz.height;
+      const x = i * w;
+      const y = viz.height - h;
+      ctx.fillStyle = `rgba(0,255,136,${0.25 + val*0.65})`;
+      ctx.fillRect(x, y, w*0.9, h);
+    }
+
+    // Bass region (approx < 150 Hz)
+    const sampleRate = AC?.sampleRate || 44100;
+    const binHz = sampleRate / analyser.fftSize; // ~ frequency per bin
+    const bassBins = Math.max(1, Math.floor(150 / binHz));
+    let sum = 0;
+    for(let i=0;i<bassBins && i<data.length;i++) sum += data[i];
+    const level = sum / (bassBins * 255); // 0..1
+
+    // Smooth bass energy
+    bassEnergy = bassEnergy * 0.85 + level * 0.15;
+
+    // Scale units slightly with bass
+    const scale = 1 + bassEnergy * 0.08;
+    document.querySelectorAll('.unit').forEach(u => {
+      u.style.transform = `scale(${scale})`;
+    });
+
+    // Title glow pulse
+    const glow = 20 + bassEnergy * 60;
+    el.title.style.textShadow = `
+      0 0 ${glow}px var(--neon),
+      0 0 ${glow*2}px var(--neon)
+    `;
+
+    // Shake on strong hits (cooldown)
+    const now = performance.now();
+    if(level > 0.45 && now - lastShake > 220){
+      document.body.classList.add('shake');
+      lastShake = now;
+      setTimeout(()=>document.body.classList.remove('shake'), 250);
+    }
+  }
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'f') document.getElementById('fsBtn').click();
+    if(e.key === 'ArrowUp'){ volume.value = Math.min(1, parseFloat(volume.value)+0.05); volume.dispatchEvent(new Event('input')); }
+    if(e.key === 'ArrowDown'){ volume.value = Math.max(0, parseFloat(volume.value)-0.05); volume.dispatchEvent(new Event('input')); }
+  });
+
+  // Initial tip: single-click anywhere to focus for shortcuts
+  document.addEventListener('click', ()=>{}, {once:true});
+</script>
+</body>
+</html>
