@@ -210,12 +210,14 @@
       <div class="unit"><div id="seconds" class="value">--</div><div class="label">SECONDES</div></div>
     </div>
 
+    <h2 class="title" id="completion">-- %</h2>
+
     <div class="controls">
       <button id="fsBtn">Plein écran</button>
       <label><input id="volume" type="range" min="0" max="1" step="0.01" value="0.65"></label>
     </div>
     
-    <div class="footer">🏠 Objectif : 1er novembre 2025 — 09:00 (heure de Paris). Tiens bon, Krabumb. 💪</div>
+    <div class="footer">🏠 Dossier validé le 13 octobre. Objectif : 1er novembre 2025 — 09:00 (heure de Paris) 💪</div>
   </div>
 
   <canvas id="viz"></canvas>
@@ -234,12 +236,13 @@
     minutes: document.getElementById('minutes'),
     seconds: document.getElementById('seconds'),
     title: document.getElementById('title'),
+    completion: document.getElementById('completion'),
     ring: document.getElementById('ring'),
     container: document.getElementById('container')
   };
 
   // Optional: progress ring from now to target across a fixed window (e.g., 30 days back)
-  const windowDays = 30; // customize if you want the arc to reflect last month sprint
+  const windowDays = 19; // customize if you want the arc to reflect last month sprint
   const windowStart = target - windowDays*24*3600*1000;
 
   function updateCountdown(){
@@ -271,6 +274,7 @@
     // Progress ring update
     const progress = Math.max(0, Math.min(1, (now - windowStart) / (target - windowStart)));
     el.ring.style.setProperty('--progress', (progress*100).toFixed(3) + '%');
+    el.completion.textContent = 'Complétion - ' + (progress*100).toFixed(4) + ' %';
   }
 
   updateCountdown();
