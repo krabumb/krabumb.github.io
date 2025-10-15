@@ -6,10 +6,12 @@
   <title>CHAD COUNTDOWN — DEMENAGEMENT</title>
   <style>
     :root{
+      /* default = green theme */
       --neon:#00ff88;
+      --neon-rgb: 0,255,136;
       --bg1:#000000;
       --bg2:#0a0a0a;
-      --accent:#ff0044;
+      --accent:#00ff88;
       --text:#e6ffe6;
     }
     html, body {
@@ -27,9 +29,9 @@
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(transparent 24px, rgba(0,255,136,0.08) 25px) 0 0/100% 25px,
-        linear-gradient(90deg, transparent 24px, rgba(0,255,136,0.08) 25px) 0 0/25px 100%;
-      filter: drop-shadow(0 0 6px rgba(0,255,136,0.25));
+        linear-gradient(transparent 24px, rgba(var(--neon-rgb),0.08) 25px) 0 0/100% 25px,
+        linear-gradient(90deg, transparent 24px, rgba(var(--neon-rgb),0.08) 25px) 0 0/25px 100%;
+      filter: drop-shadow(0 0 6px rgba(var(--neon-rgb),0.25));
       animation: gridMove 12s linear infinite;
       pointer-events: none;
     }
@@ -41,7 +43,7 @@
     /* Glow ring */
     .halo {
       position:absolute; inset: -20% -10% -10% -10%;
-      background: radial-gradient(circle at center, rgba(0,255,136,0.08), rgba(0,0,0,0) 55%);
+      background: radial-gradient(circle at center, rgba(var(--neon-rgb),0.08), rgba(0,0,0,0) 55%);
       filter: blur(20px);
       animation: haloPulse 3s ease-in-out infinite;
       pointer-events:none;
@@ -53,7 +55,7 @@
 
     .container{
       position: relative;
-      z-index: 2; /* above canvas */
+      z-index: 2;
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -90,19 +92,25 @@
     @keyframes glitch1 { 0%{clip-path: inset(0 0 85% 0)} 10%{clip-path: inset(0 0 20% 0)} 20%{clip-path: inset(0 0 60% 0)} 30%{clip-path: inset(0 0 5% 0)} 40%{clip-path: inset(0 0 40% 0)} 100%{clip-path: inset(0 0 85% 0)} }
     @keyframes glitch2 { 0%{clip-path: inset(90% 0 0 0)} 10%{clip-path: inset(70% 0 0 0)} 20%{clip-path: inset(30% 0 0 0)} 30%{clip-path: inset(10% 0 0 0)} 40%{clip-path: inset(50% 0 0 0)} 100%{clip-path: inset(90% 0 0 0)} }
 
+    .subtitle{
+      font-size: clamp(1rem, 1.2vw + .6rem, 1.5rem);
+      opacity: .9;
+      letter-spacing: 2px;
+    }
+
     .countdown{
       display:flex; gap:min(3vw,28px);
       align-items:flex-end; justify-content:center;
       margin-block: clamp(8px, 2vh, 20px);
-      filter: drop-shadow(0 0 20px rgba(0,255,136,0.55));
-      flex-wrap: nowrap; /* keep units on one line so SECONDES doesn't wrap off-screen */
+      filter: drop-shadow(0 0 20px rgba(var(--neon-rgb),0.55));
+      flex-wrap: nowrap;
     }
     .unit{
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       padding: clamp(8px, 1.5vw, 14px) clamp(12px, 2.5vw, 20px);
-      border: 2px solid rgba(0,255,136,0.25);
+      border: 2px solid rgba(var(--neon-rgb),0.25);
       border-radius: 16px;
-      background: linear-gradient(180deg, rgba(0,255,136,0.08), rgba(0,0,0,0.3));
+      background: linear-gradient(180deg, rgba(var(--neon-rgb),0.08), rgba(0,0,0,0.3));
       min-width: clamp(90px, 18vw, 220px);
       transition: transform 100ms ease;
     }
@@ -125,27 +133,30 @@
     }
     button, .file-label, input[type="range"]{
       font-family: inherit;
-      border:1px solid rgba(0,255,136,0.35);
+      border:1px solid rgba(var(--neon-rgb),0.35);
       border-radius: 14px;
       background: rgba(0,0,0,0.35);
       color: var(--text);
       padding: 10px 14px;
       cursor:pointer;
       transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms;
-      box-shadow: 0 0 12px rgba(0,255,136,0.15) inset, 0 0 12px rgba(0,255,136,0.15);
+      box-shadow: 0 0 12px rgba(var(--neon-rgb),0.15) inset, 0 0 12px rgba(var(--neon-rgb),0.15);
     }
     button:hover, .file-label:hover{
       transform: translateY(-2px);
       border-color: var(--neon);
-      box-shadow: 0 0 18px rgba(0,255,136,0.35), 0 0 18px rgba(0,255,136,0.35) inset;
+      box-shadow: 0 0 18px rgba(var(--neon-rgb),0.35), 0 0 18px rgba(var(--neon-rgb),0.35) inset;
     }
     .file-input{ display:none; }
     .file-label{ display:inline-flex; align-items:center; gap:8px; }
 
     .footer{
-      bottom:10px; width:100%; text-align:center;
+      position: fixed;
+      left: 0; right: 0; bottom:10px;
+      width:100%; text-align:center;
       font-size: 0.95rem; opacity:0.8; letter-spacing: 1.5px;
-      z-index: 3; /* ensure footer stays on top */
+      z-index: 3;
+      pointer-events: none;
     }
 
     /* Visualizer */
@@ -153,15 +164,13 @@
       position: absolute; bottom: 0; left: 0; right: 0;
       height: 28vh; width: 100%;
       opacity: 0.45;
-      filter: drop-shadow(0 0 14px rgba(0,255,136,0.4));
+      filter: drop-shadow(0 0 14px rgba(var(--neon-rgb),0.4));
       pointer-events: none;
-      z-index: 0; /* push canvas behind content */
+      z-index: 0;
     }
 
     /* Shake on bass */
-    .shake {
-      animation: shake 250ms cubic-bezier(.36,.07,.19,.97) both;
-    }
+    .shake { animation: shake 250ms cubic-bezier(.36,.07,.19,.97) both; }
     @keyframes shake {
       10%, 90% { transform: translate3d(-1px, 0, 0); }
       20%, 80% { transform: translate3d(2px, 0, 0); }
@@ -169,11 +178,11 @@
       40%, 60% { transform: translate3d(3px, 0, 0); }
     }
 
-    /* Progress ring around title that fills as days pass (optional aesthetic) */
+    /* Progress ring around title */
     .ring {
       position:absolute; width:min(80vmin, 720px); aspect-ratio:1 / 1;
       border-radius:50%;
-      box-shadow: 0 0 80px rgba(0,255,136,0.2);
+      box-shadow: 0 0 80px rgba(var(--neon-rgb),0.2);
       pointer-events:none;
     }
     .ring::before {
@@ -181,7 +190,7 @@
       position:absolute; inset: -10px;
       border-radius:50%;
       background:
-        conic-gradient(from 0turn, var(--neon) var(--progress, 0%), rgba(0,255,136,0.08) 0%);
+        conic-gradient(from 0turn, var(--neon) var(--progress, 0%), rgba(var(--neon-rgb),0.08) 0%);
       -webkit-mask:
         radial-gradient(circle at center, transparent 64%, black 66%);
       mask:
@@ -193,15 +202,72 @@
     .hint {
       font-size: 0.85rem; opacity: 0.7; margin-top: 2px;
     }
+
+    /* Switch arrows */
+    .switcher{
+      position: fixed;
+      right: 16px; top: 50%;
+      translate: 0 -50%;
+      z-index: 10;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .arrow-btn{
+      width: 54px; height: 54px; border-radius: 50%;
+      border: 2px solid rgba(var(--neon-rgb),0.5);
+      background: radial-gradient(circle at 30% 30%, rgba(var(--neon-rgb),0.15), rgba(0,0,0,0.4));
+      color: var(--text);
+      display: grid; place-items: center;
+      font-size: 22px; line-height: 1;
+      box-shadow: 0 0 12px rgba(var(--neon-rgb),0.35);
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+    .arrow-btn:hover{
+      transform: translateX(-2px) scale(1.04);
+      border-color: var(--neon);
+      box-shadow: 0 0 20px rgba(var(--neon-rgb),0.5);
+    }
+
+    /* Wipe overlay for theme transition */
+    .wipe{
+      position: fixed; inset: 0; z-index: 9;
+      pointer-events: none;
+      clip-path: circle(0% at 90% 50%);
+      transition: clip-path 600ms ease-in-out;
+      will-change: clip-path;
+    }
+    .wipe.show{ clip-path: circle(150% at 90% 50%); }
+
+    /* Song picker skin pour matcher les boutons */
+    #songPicker{
+      font-family: inherit;
+      border:1px solid rgba(var(--neon-rgb),0.35);
+      border-radius: 14px;
+      background: rgba(0,0,0,0.35);
+      color: var(--text);
+      padding: 10px 12px;
+      box-shadow: 0 0 12px rgba(var(--neon-rgb),0.15) inset, 0 0 12px rgba(var(--neon-rgb),0.15);
+    }
+    #songPicker:focus { outline: none; border-color: var(--neon); }
+    #reloadSongs{ width: 44px; padding: 10px 0; }
+
   </style>
 </head>
 <body>
   <div class="halo"></div>
   <div class="grid"></div>
 
+  <!-- theme wipe overlay (background uses its own CSS vars) -->
+  <div id="wipe" class="wipe"></div>
+
+  <div class="switcher" aria-label="Changer d'événement">
+    <button id="nextEvent" class="arrow-btn" title="Suivant (→)">▶</button>
+  </div>
+
   <div class="container" id="container">
     <div class="ring" id="ring"></div>
     <h1 class="title" id="title" data-text="CHAD HOUSE COUNTDOWN">CHAD HOUSE COUNTDOWN</h1>
+    <div class="subtitle" id="subtitle">Jusqu'au déménagement</div>
 
     <div class="countdown" id="countdown">
       <div class="unit"><div id="days" class="value">--</div><div class="label">JOURS</div></div>
@@ -214,21 +280,85 @@
 
     <div class="controls">
       <button id="fsBtn">Plein écran</button>
-      <label><input id="volume" type="range" min="0" max="1" step="0.01" value="0.65"></label>
+      <select id="songPicker" title="Choisir une musique" style="min-width:220px"></select>
+      <label><input id="volume" type="range" min="0" max="1" step="0.01" value="0.65" aria-label="Volume"></label>
+      <button id="playPauseBtn" onclick="document.getElementById('audio').paused ? document.getElementById('audio').play() : document.getElementById('audio').pause();">
+        ▶️/⏸️
+      </button>
     </div>
     
-    <div class="footer">🏠 Dossier validé le 13 octobre. Objectif : 1er novembre 2025 — 09:00 (heure de Paris) 💪</div>
+    <div class="footer" id="footer">🏠 Dossier validé le 13 octobre. Objectif : 1er novembre 2025 — 09:00 (heure de Paris) 💪</div>
   </div>
 
   <canvas id="viz"></canvas>
 
-  <!-- Hidden audio element (user-supplied file) -->
-  <audio id="audio" preload="auto" src="mousik.mp3" loop autoplay></audio>
+  <!-- Hidden audio element -->
+  <audio id="audio" preload="auto" src="music1.mp3" loop autoplay></audio>
 
 <script>
-  // === Countdown to local Paris time: 1 Nov 2025, 00:00 (CET = UTC+1) ===
-  // We pin the absolute instant to "2025-11-01T00:00:00+01:00" to avoid DST ambiguity.
-  const target = new Date("2025-11-01T09:00:00+01:00").getTime();
+  // ===== THEME + EVENTS =====
+  const THEMES = {
+    green: { neon:'#00ff88', rgb:'0,255,136', accent:'#00ff88', bg1:'#000000', bg2:'#0a0a0a', text:'#e6ffe6' },
+    red:   { neon:'#ff2a6d', rgb:'255,42,109', accent:'#ff0044', bg1:'#0a0003', bg2:'#240008', text:'#ffe6ea' },
+    blue:  { neon:'#40c9ff', rgb:'64,201,255', accent:'#0066ff', bg1:'#00040a', bg2:'#00131f', text:'#e6f6ff' },
+  };
+
+  const EVENTS = [
+    {
+      key:'BAIL',
+      title:'CHAD BAIL COUNTDOWN',
+      subtitle:"Jusqu'à la signature du bail",
+      // Thursday 23 Oct 2025 16:00 in Paris (CEST = UTC+02)
+      target:'2025-10-23T16:00:00+02:00',
+      theme: 'red',
+      windowDays: 10,
+      lines: [
+        { from: 7*24*3600*1000, text: "T-<D> jours. Calme, on déroule." },
+        { from: 24*3600*1000,  text: "Bientôt la signature du bail !! <D>j <H>h." },
+        { from: 0,             text: "Aujourd’hui ! <H>h <M>m <S>s restants." },
+        { from: -Infinity,     text: "✅ Bail signé. Prochaine étape : état des lieux." }
+      ]
+    },
+    {
+      key:'ETAT',
+      title:'CHAD CHECK-IN COUNTDOWN',
+      subtitle:"Jusqu’à l’état des lieux",
+      // Friday 31 Oct 2025 09:00 in Paris (CET = UTC+01; DST already ended Oct 26)
+      target:'2025-10-31T09:00:00+01:00',
+      theme: 'blue',
+      windowDays: 18,
+      lines: [
+        { from: 7*24*3600*1000, text: "T-<D> jours. On a encore le temps." },
+        { from: 24*3600*1000,  text: "L'état des lieux se rapproche... <D>j <H>h." },
+        { from: 0,             text: "Aujourd’hui ! <H>h <M>m <S>s restants." },
+        { from: -Infinity,     text: "✅ ETAT DES LIEUX EFFECTUE. Prochaine étape : LE DEMENAGEMENT !!" }
+      ]
+    },
+    {
+      key:'MOVE',
+      title:'CHAD HOUSE COUNTDOWN',
+      subtitle:"Jusqu'au déménagement",
+      // Saturday 1 Nov 2025 09:00 in Paris (CET = UTC+01)
+      target:'2025-11-01T09:00:00+01:00',
+      theme: 'green',
+      windowDays: 19,
+      lines: [
+        { from: 7*24*3600*1000, text: "T-<D> jours. C'est pour très bientôt..." },
+        { from: 24*3600*1000,  text: "Dernière ligne droite : <D>j <H>h." },
+        { from: 0,             text: "Aujourd’hui ! <H>h <M>m <S>s restants." },
+        { from: -Infinity,     text: "Ton royaume est prêt. Respire, pose tes cartons, et profite du silence. 🏡" }
+      ]
+    }
+  ];
+
+  const MUSICS = [
+    { name: "🎵 The Only Thing They Fear Is You", file: "music1.mp3" },
+    { name: "🎵 Power Of The Beast", file: "music2.mp3" },
+    { name: "🎵 Tondeuse Chan~~", file: "music3.mp3" }
+  ];
+
+  let currentIndex = 0; // start on BAIL (red)
+  let target = new Date(EVENTS[currentIndex].target).getTime();
 
   const el = {
     days: document.getElementById('days'),
@@ -236,51 +366,190 @@
     minutes: document.getElementById('minutes'),
     seconds: document.getElementById('seconds'),
     title: document.getElementById('title'),
+    subtitle: document.getElementById('subtitle'),
     completion: document.getElementById('completion'),
     ring: document.getElementById('ring'),
-    container: document.getElementById('container')
+    container: document.getElementById('container'),
+    footer: document.getElementById('footer'),
+    wipe: document.getElementById('wipe'),
+    songPicker: document.getElementById('songPicker')
   };
 
-  // Optional: progress ring from now to target across a fixed window (e.g., 30 days back)
-  const windowDays = 19; // customize if you want the arc to reflect last month sprint
-  const windowStart = target - windowDays*24*3600*1000;
+  const df = new Intl.DateTimeFormat('fr-FR', {
+    weekday:'long', year:'numeric', month:'long', day:'numeric',
+    hour:'2-digit', minute:'2-digit', timeZone:'Europe/Paris'
+  });
+
+  // ===== Audio / Visualizer =====
+  const audio = document.getElementById('audio');
+  const volume = document.getElementById('volume');
+  const viz = document.getElementById('viz');
+  const ctx = viz.getContext('2d');
+
+  
+  function populateSongPicker(){
+    // Efface et remplit
+    el.songPicker.innerHTML = '';
+    MUSICS.forEach((t, i) => {
+      const opt = document.createElement('option');
+      opt.value = t.file;
+      opt.textContent = t.name;
+      el.songPicker.appendChild(opt);
+    });
+
+    // Restaure la dernière sélection si dispo
+    const last = localStorage.getItem('chad.song.url');
+    if(last && MUSICS.some(t => t.file === last)){
+      el.songPicker.value = last;
+    } else if (MUSICS.length) {
+      el.songPicker.value = MUSICS[0].file;
+    }
+
+    // Si l'audio n'a pas encore été lancé, on ne force pas la lecture.
+    // Mais si déjà en lecture, on sync sur le choix courant.
+    if(!audio.paused){
+      safeSwitchTo(el.songPicker.value);
+    }
+  }
+
+  async function safeSwitchTo(url){
+    try{
+      const wasPaused = audio.paused;
+      const wasTime   = audio.currentTime;
+      audio.src = url;
+      audio.currentTime = 0;
+
+      if(!wasPaused){
+        await audio.play();
+      }
+      localStorage.setItem('chad.song.url', url);
+    } catch(err) {
+      console.error('Switch song failed', err);
+    }
+  }
+
+  populateSongPicker();
+  el.songPicker.addEventListener('change', (e) => {
+    safeSwitchTo(e.target.value);
+  });
+
+  function applyRootTheme(th){
+    const root = document.documentElement.style;
+    root.setProperty('--neon', th.neon);
+    root.setProperty('--neon-rgb', th.rgb);
+    root.setProperty('--accent', th.accent);
+    root.setProperty('--bg1', th.bg1);
+    root.setProperty('--bg2', th.bg2);
+    root.setProperty('--text', th.text);
+  }
+
+  function setWipeTheme(th){
+    // style the overlay using its own CSS vars and background
+    el.wipe.style.setProperty('--neon', th.neon);
+    el.wipe.style.setProperty('--neon-rgb', th.rgb);
+    el.wipe.style.setProperty('--bg1', th.bg1);
+    el.wipe.style.setProperty('--bg2', th.bg2);
+    el.wipe.style.background =
+      `radial-gradient(1200px 800px at 50% 50%, var(--bg2), var(--bg1) 70%)`;
+  }
+
+  function switchEvent(next=true){
+    const old = EVENTS[currentIndex];
+    currentIndex = (currentIndex + (next?1:-1) + EVENTS.length) % EVENTS.length;
+    const ev = EVENTS[currentIndex];
+
+    // prepare wipe visual with target theme
+    const th = THEMES[ev.theme];
+    setWipeTheme(th);
+    void el.wipe.offsetWidth; // reflow
+    el.wipe.classList.add('show');
+
+    // after wipe anim ends, actually apply theme + data
+    setTimeout(()=>{
+      applyRootTheme(th);
+      setTarget(ev);
+      el.wipe.classList.remove('show');
+    }, 620); // slightly > CSS 600ms
+  }
+
+  // ===== COUNTDOWN =====
+  const windowDays = EVENTS[currentIndex].windowDays;
+  let windowStart = target - windowDays*24*3600*1000;
+
+  function setTarget(ev){
+    target = new Date(ev.target).getTime();
+    el.title.textContent = ev.title;
+    el.title.setAttribute('data-text', ev.title);
+    el.subtitle.textContent = ev.subtitle;
+    el.footer.textContent =
+      `🏷️ ${ev.subtitle} — ${df.format(new Date(ev.target))} (heure de Paris)`;
+    // progress ring window: last 19 days
+    windowStart = target - ev.windowDays*24*3600*1000;
+  }
+
+  // init current theme & data
+  applyRootTheme(THEMES[EVENTS[currentIndex].theme]);
+  setTarget(EVENTS[currentIndex]);
+
+  // ===== helper phrase par EVENT =====
+  const MS = { d: 24*3600*1000, h: 3600*1000, m: 60*1000 };
+
+  function formatTokens(text, {d,h,m,s}){
+    return text
+      .replace(/<D>/g, d)
+      .replace(/<H>/g, h)
+      .replace(/<M>/g, m)
+      .replace(/<S>/g, s);
+  }
+
+  function pickEventPhrase(eventObj, distMs, parts){
+    const lines = eventObj.lines || [];
+    for(const L of lines){
+      if(distMs >= L.from) return formatTokens(L.text, parts);
+    }
+    // fallback si pas de config
+    return eventObj.subtitle || "";
+  }
 
   function updateCountdown(){
     const now = Date.now();
-    let dist = target - now;
+    const dist = target - now;
 
-    if(dist <= 0){
-      document.body.classList.remove('shake');
-      document.body.innerHTML = `
-        <div class="halo"></div>
-        <div class="grid"></div>
-        <div class="container">
-          <h1 class="title" data-text="WELCOME HOME, CHAD">WELCOME HOME, CHAD</h1>
-          <p style="font-size:1.6rem;opacity:0.9">Ton royaume est prêt. Respire, pose tes cartons, et profite du silence. 🏡</p>
-        </div>`;
-      return;
-    }
-
-    const d = Math.floor(dist / (1000*60*60*24));
-    const h = Math.floor((dist % (1000*60*60*24)) / (1000*60*60));
-    const m = Math.floor((dist % (1000*60*60)) / (1000*60));
-    const s = Math.floor((dist % (1000*60)) / 1000);
+    // clamp pour l'affichage si passé
+    const d = Math.max(0, Math.floor(dist / (MS.d)));
+    const h = Math.max(0, Math.floor((dist % MS.d) / MS.h));
+    const m = Math.max(0, Math.floor((dist % MS.h) / MS.m));
+    const s = Math.max(0, Math.floor((dist % MS.m) / 1000));
 
     el.days.textContent = d.toString().padStart(2,'0');
     el.hours.textContent = h.toString().padStart(2,'0');
     el.minutes.textContent = m.toString().padStart(2,'0');
     el.seconds.textContent = s.toString().padStart(2,'0');
 
-    // Progress ring update
-    const progress = Math.max(0, Math.min(1, (now - windowStart) / (target - windowStart)));
+    // Progress ring (bloqué à 100% si event passé)
+    const progressRaw = (now - windowStart) / (target - windowStart);
+    const progress = Math.max(0, Math.min(1, progressRaw));
     el.ring.style.setProperty('--progress', (progress*100).toFixed(3) + '%');
-    el.completion.textContent = 'Complétion - ' + (progress*100).toFixed(4) + ' %';
+    el.completion.textContent = (dist <= 0)
+      ? 'Complété - 100.0000 %'
+      : 'Complétion - ' + (progress*100).toFixed(4) + ' %';
+
+    // Phrase dynamique depuis l'EVENT actif
+    const ev = EVENTS[currentIndex];
+    const phrase = pickEventPhrase(ev, dist, { d, h, m, s });
+    // J’utilise le sous-titre existant comme zone d’affichage
+    if(el.subtitle) el.subtitle.textContent = phrase;
+
+    // Si event passé, on coupe juste l'effet "shake" ; on NE détruit PAS le DOM
+    if(dist <= 0){
+      document.body.classList.remove('shake');
+    }
   }
 
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-  // === Fullscreen ===
+  // ===== UI: full screen & switching =====
   document.getElementById('fsBtn').addEventListener('click', () => {
     const elem = document.documentElement;
     if (!document.fullscreenElement) {
@@ -289,15 +558,19 @@
       document.exitFullscreen?.() || document.webkitExitFullscreen?.();
     }
   });
+  document.getElementById('nextEvent').addEventListener('click', () => switchEvent(true));
 
-  // === Audio / Visualizer ===
-  const audio = document.getElementById('audio');
-  const volume = document.getElementById('volume');
-  const viz = document.getElementById('viz');
-  const ctx = viz.getContext('2d');
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'f') document.getElementById('fsBtn').click();
+    if(e.key === 'ArrowRight') switchEvent(true);
+    if(e.key === 'ArrowLeft') switchEvent(false);
+    if(e.key === 'ArrowUp'){ volume.value = Math.min(1, parseFloat(volume.value)+0.05); volume.dispatchEvent(new Event('input')); }
+    if(e.key === 'ArrowDown'){ volume.value = Math.max(0, parseFloat(volume.value)-0.05); volume.dispatchEvent(new Event('input')); }
+  });
 
   let AC, source, analyser, data, rafId;
   let bassEnergy = 0, lastShake = 0;
+  let neonRGB = getComputedStyle(document.documentElement).getPropertyValue('--neon-rgb').trim();
 
   function resizeCanvas(){
     viz.width = window.innerWidth;
@@ -311,89 +584,45 @@
   });
   audio.volume = parseFloat(volume.value);
 
-  async function enableAudio(){
-    if(!audio.src){
-      // If no file chosen, prompt the user
-      alert("Choisis un fichier audio (MP3/OGG) — idéalement une piste de DOOM que tu possèdes légalement 😉");
-      return;
-    }
-    // Autoplay policies require a user gesture
-    try{
-      // Create audio context once
-      if(!AC){
-        AC = new (window.AudioContext || window.webkitAudioContext)();
-        analyser = AC.createAnalyser();
-        analyser.fftSize = 2048;
-        data = new Uint8Array(analyser.frequencyBinCount);
-      }
-      if(AC.state === 'suspended') await AC.resume();
-
-      // (Re)connect graph
-      if(source) source.disconnect();
-      source = AC.createMediaElementSource(audio);
-      source.connect(analyser);
-      analyser.connect(AC.destination);
-
-      await audio.play();
-
-      loopViz();
-    }catch(e){
-      console.error(e);
-      alert("Impossible de lancer l'audio. Essaie après avoir sélectionné un fichier et cliqué à nouveau.");
-    }
-  }
-
-  function pauseAudio(){
-    if(audio.paused) return;
-    audio.pause();
-    cancelAnimationFrame(rafId);
-  }
-
   function loopViz(){
     rafId = requestAnimationFrame(loopViz);
     if(!analyser) return;
 
     analyser.getByteFrequencyData(data);
 
-    // Draw bars
     ctx.clearRect(0,0,viz.width,viz.height);
     const n = 128;
     const step = Math.floor(data.length / n);
     const w = viz.width / n;
+
+    // refresh neonRGB (theme may change)
+    neonRGB = getComputedStyle(document.documentElement).getPropertyValue('--neon-rgb').trim();
+
     for(let i=0;i<n;i++){
       const val = data[i*step] / 255;
       const h = val * viz.height;
       const x = i * w;
       const y = viz.height - h;
-      ctx.fillStyle = `rgba(0,255,136,${0.25 + val*0.65})`;
+      ctx.fillStyle = `rgba(${neonRGB},${0.25 + val*0.65})`;
       ctx.fillRect(x, y, w*0.9, h);
     }
 
-    // Bass region (approx < 150 Hz)
     const sampleRate = AC?.sampleRate || 44100;
-    const binHz = sampleRate / analyser.fftSize; // ~ frequency per bin
+    const binHz = sampleRate / analyser.fftSize;
     const bassBins = Math.max(1, Math.floor(150 / binHz));
     let sum = 0;
     for(let i=0;i<bassBins && i<data.length;i++) sum += data[i];
-    const level = sum / (bassBins * 255); // 0..1
+    const level = sum / (bassBins * 255);
 
-    // Smooth bass energy
     bassEnergy = bassEnergy * 0.85 + level * 0.15;
-
-    // Scale units slightly with bass
     const scale = 1 + bassEnergy * 0.08;
     document.querySelectorAll('.unit').forEach(u => {
       u.style.transform = `scale(${scale})`;
     });
 
-    // Title glow pulse
     const glow = 20 + bassEnergy * 60;
-    el.title.style.textShadow = `
-      0 0 ${glow}px var(--neon),
-      0 0 ${glow*2}px var(--neon)
-    `;
+    el.title.style.textShadow = `0 0 ${glow}px var(--neon), 0 0 ${glow*2}px var(--neon)`;
 
-    // Shake on strong hits (cooldown)
     const now = performance.now();
     if(level > 0.45 && now - lastShake > 220){
       document.body.classList.add('shake');
@@ -402,15 +631,8 @@
     }
   }
 
-  // Keyboard shortcuts
-  window.addEventListener('keydown', (e)=>{
-    if(e.key === 'f') document.getElementById('fsBtn').click();
-    if(e.key === 'ArrowUp'){ volume.value = Math.min(1, parseFloat(volume.value)+0.05); volume.dispatchEvent(new Event('input')); }
-    if(e.key === 'ArrowDown'){ volume.value = Math.max(0, parseFloat(volume.value)-0.05); volume.dispatchEvent(new Event('input')); }
-  });
-
-  // Initial tip: single-click anywhere to focus for shortcuts
-  document.addEventListener('click', ()=>{}, {once:true});
+  // switch to current selected audio source
+  audio.src = el.songPicker.value;
 </script>
 </body>
 </html>
